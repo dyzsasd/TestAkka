@@ -1,8 +1,6 @@
 
 import akka.actor._
 import akka.routing.RoundRobinRouter
-import akka.util.Duration
-import akka.util.duration._
 
 sealed trait PiMessage
 
@@ -22,7 +20,7 @@ class Worker extends Actor{
     }).reduce((a,b)=>a+b)
   }
 
-  override protected def receive: Receive = {
+  override def receive: Receive = {
     case Work(start, nrOfElements)=> sender ! Result(calculatePiFor(start, nrOfElements))
   }
 }
@@ -34,7 +32,7 @@ class Master(nrOfWorkers:Int, nrOfMessages:Int, nrOfElements: Int, listener:Acto
 
   val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinRouter(nrOfWorkers)), name = "workerRouter")
 
-  override protected def receive: Receive = {
+  override def receive: Receive = {
     case Calculate => (0 until nrOfMessages).map(_*nrOfElements).foreach(workerRouter ! Work(_,nrOfElements))
     case Result(value)=>
       pi += value
